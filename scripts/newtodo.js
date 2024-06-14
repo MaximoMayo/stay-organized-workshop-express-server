@@ -1,23 +1,28 @@
 "use strict";
 
-"use strict";
-
-//load in content
+// Load in content
 document.addEventListener('DOMContentLoaded', init);
 
-//initialize the functionality
+// Initialize the functionality
 function init(){
     populateToDoDropdown();
     populateCatDropdown();
     addEventListeners();
 }
 
-//add event listeners to the page 
+// Add event listeners to the page 
 function addEventListeners(){
-    document.getElementById("addButton").addEventListener("click", addNewToDo);
+    document.getElementById("addButton").addEventListener("click", clickForNewToDo);
 }
 
-//add users to the select dropdown
+// Handle the click event for the add button
+function clickForNewToDo(){
+    const newFormData = addNewToDo();
+    console.log(newFormData);
+    postNewToDo(newFormData);
+}
+
+// Add users to the select dropdown
 async function populateToDoDropdown(){
     const todoSelect = document.getElementById("todoSelect");
     const response = await fetch('http://localhost:8083/api/users');
@@ -26,12 +31,13 @@ async function populateToDoDropdown(){
     const fragment = document.createDocumentFragment();
 
     for(let i = 0; i < users.length; i++){
-        const option = new Option(`${users[i].name} `, users[i].id);
+        const option = new Option(`${users[i].name}`, users[i].id);
         fragment.appendChild(option);
     }
     todoSelect.appendChild(fragment);
 }
 
+// Add categories to the select dropdown
 async function populateCatDropdown(){
     const catSelect = document.getElementById("catSelect");
     const response = await fetch('http://localhost:8083/api/categories');
@@ -40,29 +46,25 @@ async function populateCatDropdown(){
     const fragment = document.createDocumentFragment();
 
     for(let i = 0; i < categories.length; i++){
-        const option = new Option(`${categories[i].name} `, categories[i].id);
+        const option = new Option(`${categories[i].name}`, categories[i].id);
         fragment.appendChild(option);
     }
     catSelect.appendChild(fragment);
 }
 
-async function addNewToDo(){
+// Create a new to-do item
+function addNewToDo(){
     const user = getUsers();
     const cat = getCategory();
     const desc = getDescription();
     const deadline = getDeadline();
     const prior = getPriority();
-    console.log(user);
 
     let newFormData = createNewFormData(user, cat, desc, deadline, prior);
-    console.log(newFormData);
-
-    // let postOption = "Post"
-    // let requestOptions = requestParams(postOption);
-    // console.log(requestOptions);
-
+    return newFormData;
 }
 
+// Create new FormData object
 function createNewFormData(user, cat, desc, deadline, prior){
     const formData = new FormData();
     formData.append("userid", user);
@@ -70,41 +72,53 @@ function createNewFormData(user, cat, desc, deadline, prior){
     formData.append("description", desc);
     formData.append("deadline", deadline);
     formData.append("priority", prior);
+    console.log(formData);
 
     return formData;
 }
 
-// function requestParams(Option){
-//     let methodOption = `"${Option}"`;
-//     console.log(methodOption);
-//     const requestOptions = {
-//         method: methodOption,
-//         body: formData,
-//         redirect: "follow"
-//     }
-//     return requestOptions;
-// }
+// Post the new to-do item to the server
+async function postNewToDo(formData) {
+    const requestOptions = {
+        method: "POST",
+        body: formData,
+        redirect: "follow"
+    };
 
+    try {
+        const response = await fetch("http://localhost:8083/api/todos", requestOptions);
+        const result = await response.text();
+        console.log(result);
+    } catch (error) {
+        console.error(error);
+    }
+}
+
+// Get user value from the dropdown
 function getUsers(){
     let userValue = document.getElementById("todoSelect").value;
     return userValue;
 }
 
+// Get category value from the dropdown
 function getCategory(){
     let catValue = document.getElementById("catSelect").value;
     return catValue;
 }
 
+// Get description from the input
 function getDescription(){
     let descValue = document.getElementById("description").value;
     return descValue;
 }
 
+// Get deadline from the input
 function getDeadline(){
     let deadlineValue = document.getElementById("date").value;
     return deadlineValue;
 }
 
+// Get priority from the dropdown
 function getPriority(){
     let priorValue = document.getElementById("urgSelect").value;
     return priorValue;
