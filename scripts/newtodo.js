@@ -66,22 +66,24 @@ function addNewToDo(){
 
 // Create new FormData object
 function createNewFormData(user, cat, desc, deadline, prior){
-    const formData = new FormData();
-    formData.append("userid", user);
-    formData.append("category", cat);
-    formData.append("description", desc);
-    formData.append("deadline", deadline);
-    formData.append("priority", prior);
-    console.log(formData);
-
-    return formData;
+    const data = {
+        userid: user,
+        category: cat,
+        description: desc,
+        deadline: deadline,
+        priority: prior
+    };
+    return data;
 }
 
 // Post the new to-do item to the server
-async function postNewToDo(formData) {
+async function postNewToDo(data) {
     const requestOptions = {
         method: "POST",
-        body: formData,
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(data),
         redirect: "follow"
     };
 
